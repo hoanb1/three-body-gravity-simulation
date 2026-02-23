@@ -4,6 +4,9 @@ from PyQt6.QtCore import Qt, QPoint, QTimer
 from PyQt6.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 import sys
 import numpy as np
+import csv
+import json
+import logging
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from src.core.physics import rk4_step, Body
@@ -22,6 +25,7 @@ class OpenGLWidget(QOpenGLWidget):
         self.rotation_y = 30  # Initial 3D rotation
         self.rotation_z = 10
         self.offset_z = 0
+        self.selected_body = -1
         self.radii = radii
         
     def initializeGL(self):
@@ -170,6 +174,11 @@ class OpenGLWidget(QOpenGLWidget):
     def mousePressEvent(self, event: QMouseEvent):
         self.last_mouse_pos = event.position()
         
+        # Object selection on left click without modifiers
+        if event.button() == 1 and not event.modifiers():
+            self.selected_body = (self.selected_body + 1) % len(self.bodies)
+            logging.info("Selected body: %d", self.selected_body)
+        
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.last_mouse_pos:
             dx = event.position().x() - self.last_mouse_pos.x()
@@ -269,6 +278,10 @@ class OpenGLWindow(QMainWindow):
         self.coord_label = QLabel("Pos: (0.0, 0.0, 0.0)")
         control_layout.addWidget(self.coord_label)
         
+        # Selected body label
+        self.selected_label = QLabel("Selected Body: None")
+        control_layout.addWidget(self.selected_label)
+        
         # Full screen button
         fullscreen_button = QPushButton("Full Screen")
         fullscreen_button.clicked.connect(self.toggle_fullscreen)
@@ -314,6 +327,14 @@ class OpenGLWindow(QMainWindow):
         # Update coordinates
         pos = self.bodies[0].pos
         self.coord_label.setText(f"Pos: ({pos[0]:.1f}, {pos[1]:.1f}, {pos[2]:.1f})")
+        
+        # Update selected body info
+        if self.gl_widget.selected_body >= 0:
+            body = self.bodies[self.gl_widget.selected_body]
+            info = f"Selected Body {self.gl_widget.selected_body}: Mass {body.mass:.1f}, Pos ({body.pos[0]:.1f}, {body.pos[1]:.1f}, {body.pos[2]:.1f}), Vel ({body.vel[0]:.1f}, {body.vel[1]:.1f}, {body.vel[2]:.1f})"
+            self.selected_label.setText(info)
+        else:
+            self.selected_label.setText("Selected Body: None")
 
     def update_fps(self):
         fps = self.frame_count
@@ -321,6 +342,7 @@ class OpenGLWindow(QMainWindow):
         self.frame_count = 0
 
     def reset_simulation(self):
+        logging.info("Simulation reset")
         self.bodies = [Body(d['mass'], d['pos'], d['vel']) for d in self.bodies_data]
         self.gl_widget.bodies = self.bodies
         self.gl_widget.radii = self.radii
@@ -338,14 +360,17 @@ class OpenGLWindow(QMainWindow):
 
     def set_time_scale(self, value):
         self.time_scale = value / 10.0
+        logging.info("Time scale changed to %.2f", self.time_scale)
 
     def toggle_fullscreen(self):
+        logging.info("Full screen toggled")
         if self.isFullScreen():
             self.showNormal()
         else:
             self.showFullScreen()
 
     def open_settings(self):
+        logging.info("Settings dialog opened")
         dialog = SettingsDialog(self.bodies_data, self)
         if dialog.exec():
             self.bodies_data = dialog.get_data()
@@ -362,8 +387,10 @@ class OpenGLWindow(QMainWindow):
                     for i, body in enumerate(self.bodies):
                         writer.writerow([i, body.mass, self.radii[i], body.pos[0], body.pos[1], body.pos[2], body.vel[0], body.vel[1], body.vel[2]])
                 QMessageBox.information(self, "Export Successful", f"Data exported to {filename}")
+                logging.info("Data exported to %s", filename)
             except Exception as e:
                 QMessageBox.warning(self, "Export Failed", str(e))
+                logging.error("Data export failed: %s", str(e))
 
     def save_config(self):
         filename, _ = QFileDialog.getSaveFileName(self, "Save Config", "", "JSON Files (*.json)")
@@ -372,8 +399,10 @@ class OpenGLWindow(QMainWindow):
                 with open(filename, 'w') as f:
                     json.dump(self.bodies_data, f, indent=4)
                 QMessageBox.information(self, "Save Successful", f"Config saved to {filename}")
+                logging.info("Config saved to %s", filename)
             except Exception as e:
                 QMessageBox.warning(self, "Save Failed", str(e))
+                logging.error("Config save failed: %s", str(e))
 
     def load_config(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Load Config", "", "JSON Files (*.json)")
@@ -384,8 +413,10 @@ class OpenGLWindow(QMainWindow):
                 self.radii = [d['radius'] for d in self.bodies_data]
                 self.reset_simulation()
                 QMessageBox.information(self, "Load Successful", f"Config loaded from {filename}")
+                logging.info("Config loaded from %s", filename)
             except Exception as e:
                 QMessageBox.warning(self, "Load Failed", str(e))
+                logging.error("Config load failed: %s", str(e))
 
 class SettingsDialog(QDialog):
     def __init__(self, bodies_data, parent=None):
@@ -486,11 +517,12 @@ class SettingsDialog(QDialog):
         return data
 
 def main():
-    print("App starting")
+    logging.basicConfig(level=logging.INFO, filename='simulation.log', format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.info("Application started")
     bodies = [
-        Body(100, [50, 50, 10], [20, 10, 5]),
-        Body(102, [100, 50, 20], [15, 20, 10]),
-        Body(104, [50, 100, 30], [10, 15, 20])
+        Body(50, [50, 50, 10], [20, 10, 5]),
+        Body(100, [100, 50, 20], [15, 20, 10]),
+        Body(200, [50, 100, 30], [10, 15, 20])
     ]
     app = QApplication(sys.argv)
     print("QApplication created")
