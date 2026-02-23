@@ -1,7 +1,5 @@
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QSlider, QHBoxLayout, QDialog, QFormLayout, QDoubleSpinBox, QGroupBox, QDialogButtonBox, QSpinBox, QScrollArea, QTableWidget, QTableWidgetItem, QHeaderView
-from PyQt6.QtCore import Qt, QPoint, QTimer
-from PyQt6.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QPushButton, QSlider, QHBoxLayout, QDialog, QFormLayout, QDoubleSpinBox, QGroupBox, QDialogButtonBox, QSpinBox, QScrollArea, QTableWidget, QTableWidgetItem, QHeaderView, QFileDialog, QMessageBox
 from PyQt6.QtCore import Qt, QPoint, QTimer
 from PyQt6.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 import sys
@@ -20,9 +18,9 @@ class OpenGLWidget(QOpenGLWidget):
         self.offset_x = 0
         self.offset_y = 0
         self.last_mouse_pos = None
-        self.rotation_x = 0
-        self.rotation_y = 0
-        self.rotation_z = 0
+        self.rotation_x = 20  # Initial 3D tilt
+        self.rotation_y = 30  # Initial 3D rotation
+        self.rotation_z = 10
         self.offset_z = 0
         self.radii = radii
         
@@ -41,7 +39,7 @@ class OpenGLWidget(QOpenGLWidget):
         # Enable lighting
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
-        light_pos = [0, 0, 100, 1]  # Closer to viewing direction
+        light_pos = [0, 0, -100, 1]  # From viewing direction, illuminating objects
         glLightfv(GL_LIGHT0, GL_POSITION, light_pos)
         # Add ambient lighting
         glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.3, 0.3, 0.3, 1])
@@ -102,29 +100,29 @@ class OpenGLWidget(QOpenGLWidget):
         # X axis red
         glColor3f(1, 0, 0)
         glVertex3f(0, 0, 0)
-        glVertex3f(200, 0, 0)
+        glVertex3f(200 * self.scale, 0, 0)
         # Y axis green
         glColor3f(0, 1, 0)
         glVertex3f(0, 0, 0)
-        glVertex3f(0, 200, 0)
+        glVertex3f(0, 200 * self.scale, 0)
         # Z axis blue
         glColor3f(0, 0, 1)
         glVertex3f(0, 0, 0)
-        glVertex3f(0, 0, 200)
+        glVertex3f(0, 0, 200 * self.scale)
         glEnd()
         
         # Draw grid lines on XY plane
-        glLineWidth(1.0)
-        glColor4f(0.3, 0.3, 0.3, 0.5)
-        for x in range(-300, 301, 50):
+        glLineWidth(1.5)
+        glColor4f(0.4, 0.4, 0.4, 0.6)
+        for x in range(-500, 501, 50):
             glBegin(GL_LINES)
-            glVertex3f(x, -300, 0)
-            glVertex3f(x, 300, 0)
+            glVertex3f(x * self.scale, -500 * self.scale, 0)
+            glVertex3f(x * self.scale, 500 * self.scale, 0)
             glEnd()
-        for y in range(-300, 301, 50):
+        for y in range(-500, 501, 50):
             glBegin(GL_LINES)
-            glVertex3f(-300, y, 0)
-            glVertex3f(300, y, 0)
+            glVertex3f(-500 * self.scale, y * self.scale, 0)
+            glVertex3f(500 * self.scale, y * self.scale, 0)
             glEnd()
         
         glEnable(GL_LIGHTING)
@@ -224,9 +222,9 @@ class OpenGLWindow(QMainWindow):
         self.bodies = bodies
         self.time_scale = 1.0
         self.bodies_data = [
-            {'mass': 100, 'radius': 5, 'pos': [50, 50, 10], 'vel': [20, 10, 5]},
-            {'mass': 102, 'radius': 5, 'pos': [100, 50, 20], 'vel': [15, 20, 10]},
-            {'mass': 104, 'radius': 5, 'pos': [50, 100, 30], 'vel': [10, 15, 20]}
+            {'mass': 50, 'radius': 2.5, 'pos': [50, 50, 10], 'vel': [20, 10, 5]},
+            {'mass': 100, 'radius': 5, 'pos': [100, 50, 20], 'vel': [15, 20, 10]},
+            {'mass': 200, 'radius': 10, 'pos': [50, 100, 30], 'vel': [10, 15, 20]}
         ]
         self.radii = [d['radius'] for d in self.bodies_data]
         self.setWindowTitle("OpenGL Three-Body Simulation")
@@ -281,6 +279,21 @@ class OpenGLWindow(QMainWindow):
         settings_button.clicked.connect(self.open_settings)
         control_layout.addWidget(settings_button)
         
+        # Export Data button
+        export_button = QPushButton("Export Data")
+        export_button.clicked.connect(self.export_data)
+        control_layout.addWidget(export_button)
+        
+        # Save Config button
+        save_button = QPushButton("Save Config")
+        save_button.clicked.connect(self.save_config)
+        control_layout.addWidget(save_button)
+        
+        # Load Config button
+        load_button = QPushButton("Load Config")
+        load_button.clicked.connect(self.load_config)
+        control_layout.addWidget(load_button)
+        
         layout.addWidget(control_panel, 1)  # Stretch factor 1
         
         # FPS timer
@@ -315,9 +328,9 @@ class OpenGLWindow(QMainWindow):
         self.gl_widget.offset_x = 0
         self.gl_widget.offset_y = 0
         self.gl_widget.offset_z = 0
-        self.gl_widget.rotation_x = 0
-        self.gl_widget.rotation_y = 0
-        self.gl_widget.rotation_z = 0
+        self.gl_widget.rotation_x = 20  # Reset to 3D view
+        self.gl_widget.rotation_y = 30  # Reset to 3D view
+        self.gl_widget.rotation_z = 10
         self.gl_widget.trails = [[] for _ in self.bodies]
         self.time_scale = 1.0
         self.time_slider.setValue(10)
@@ -338,6 +351,41 @@ class OpenGLWindow(QMainWindow):
             self.bodies_data = dialog.get_data()
             self.radii = [d['radius'] for d in self.bodies_data]
             self.reset_simulation()
+
+    def export_data(self):
+        filename, _ = QFileDialog.getSaveFileName(self, "Export Data", "", "CSV Files (*.csv)")
+        if filename:
+            try:
+                with open(filename, 'w', newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(['Body ID', 'Mass', 'Radius', 'Pos X', 'Pos Y', 'Pos Z', 'Vel X', 'Vel Y', 'Vel Z'])
+                    for i, body in enumerate(self.bodies):
+                        writer.writerow([i, body.mass, self.radii[i], body.pos[0], body.pos[1], body.pos[2], body.vel[0], body.vel[1], body.vel[2]])
+                QMessageBox.information(self, "Export Successful", f"Data exported to {filename}")
+            except Exception as e:
+                QMessageBox.warning(self, "Export Failed", str(e))
+
+    def save_config(self):
+        filename, _ = QFileDialog.getSaveFileName(self, "Save Config", "", "JSON Files (*.json)")
+        if filename:
+            try:
+                with open(filename, 'w') as f:
+                    json.dump(self.bodies_data, f, indent=4)
+                QMessageBox.information(self, "Save Successful", f"Config saved to {filename}")
+            except Exception as e:
+                QMessageBox.warning(self, "Save Failed", str(e))
+
+    def load_config(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Load Config", "", "JSON Files (*.json)")
+        if filename:
+            try:
+                with open(filename, 'r') as f:
+                    self.bodies_data = json.load(f)
+                self.radii = [d['radius'] for d in self.bodies_data]
+                self.reset_simulation()
+                QMessageBox.information(self, "Load Successful", f"Config loaded from {filename}")
+            except Exception as e:
+                QMessageBox.warning(self, "Load Failed", str(e))
 
 class SettingsDialog(QDialog):
     def __init__(self, bodies_data, parent=None):
