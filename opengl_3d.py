@@ -87,6 +87,25 @@ class OpenGLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
         glDisable(GL_BLEND)
         
+        # Draw axis lines
+        glDisable(GL_LIGHTING)
+        glLineWidth(3.0)
+        glBegin(GL_LINES)
+        # X axis red
+        glColor3f(1, 0, 0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(200, 0, 0)
+        # Y axis green
+        glColor3f(0, 1, 0)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, 200, 0)
+        # Z axis blue
+        glColor3f(0, 0, 1)
+        glVertex3f(0, 0, 0)
+        glVertex3f(0, 0, 200)
+        glEnd()
+        glEnable(GL_LIGHTING)
+        
         # Draw a colored triangle to verify rendering
         glBegin(GL_TRIANGLES)
         glColor3f(1, 0, 0)
@@ -271,9 +290,9 @@ class OpenGLWindow(QMainWindow):
 def main():
     print("App starting")
     bodies = [
-        Body(100, [0, 100, 0], [10, 0, 0]),
-        Body(102, [100, 0, 0], [12, 0, 0]),
-        Body(104, [0, 0, 100], [14, 0, 0])
+        Body(100, [50, 50, 10], [20, 10, 5]),
+        Body(102, [100, 50, 20], [15, 20, 10]),
+        Body(104, [50, 100, 30], [10, 15, 20])
     ]
     app = QApplication(sys.argv)
     print("QApplication created")
