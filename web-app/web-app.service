@@ -1,0 +1,14 @@
+[Unit]
+Description=Orbital Mechanics Web App
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/web-app-build
+ExecStart=/usr/bin/serve -s . -l 3001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
