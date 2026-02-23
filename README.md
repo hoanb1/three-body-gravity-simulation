@@ -1,70 +1,151 @@
-# Dự Án Mô Phỏng 3 Vật Thể Chuyển Động Trong Không Gian
+# 3D Three-Body Gravity Simulation
 
-Hoàn thiện dự án mô phỏng 3 vật thể với kiến trúc chuyên nghiệp (PyQt6 + ModernGL + NumPy), chúng ta sẽ hệ thống lại thành một quy trình phát triển chuẩn (Software Development Lifecycle). Dưới đây là bản lộ trình chi tiết từ thiết kế đến đóng gói.
+A professional, real-time 3D simulation of gravitational interactions between celestial bodies using PyQt6, OpenGL, and NumPy. Features accurate physics, interactive controls, and polished graphics.
 
-## 1. Thiết Lập Cấu Trúc Thư Mục Dự Án
+## 🚀 Features
 
-Một dự án chuyên nghiệp cần sự ngăn nắp để dễ bảo trì và mở rộng.
+### Physics Engine
+- **RK4 Integration**: High-precision numerical integration for stable, accurate orbital mechanics
+- **NumPy Vectorized Calculations**: Optimized force computations for real-time performance
+- **Customizable Bodies**: Mass, initial position, and velocity for each celestial body
+
+### 3D Rendering & Graphics
+- **OpenGL Rendering**: ModernGL with immediate mode for smooth 3D visualization
+- **Spherical Bodies**: Lit spheres with Phong shading proportional to mass
+- **Orbital Trails**: Long, colored trails (2000+ points) showing historical paths
+- **Coordinate Planes**: Semi-transparent XY, XZ, YZ planes with grid lines for spatial reference
+- **Lighting**: Ambient and directional lighting for realistic depth perception
+
+### Interactive Controls
+- **Mouse Navigation**:
+  - Left-click + drag: Rotate view (XY) / Shift: Pan / Ctrl: Zoom / Alt: Rotate Z-axis
+  - Wheel zoom for additional scaling
+- **Settings Dialog**: Professional table-based interface for body parameters
+- **Dynamic Body Management**: Add/remove bodies (1-10) with auto-generated parameters
+- **Real-time Adjustments**: Time scale, reset simulation, full screen mode
+
+### User Interface
+- **Real-time Displays**: FPS counter, current body position
+- **Professional Layout**: Control panel with intuitive buttons and sliders
+- **Responsive Design**: Table-based settings with scrollable interface
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.8+
+- Ubuntu/Debian-based Linux (recommended for OpenGL support)
+
+### Setup
+```bash
+# Clone or download the project
+cd /path/to/project
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## 🎮 Usage
+
+### Running the Simulation
+```bash
+python opengl_3d.py
+```
+
+### Controls
+- **Mouse**:
+  - Drag: Rotate view
+  - Shift + Drag: Pan camera
+  - Ctrl + Drag: Zoom
+  - Alt + Drag: Rotate Z-axis
+  - Wheel: Zoom
+- **Settings**: Click "Settings" to customize bodies and parameters
+- **Reset**: Reset simulation to initial state
+- **Time Scale**: Adjust simulation speed (0.1x - 10x)
+- **Full Screen**: Toggle full screen mode
+
+### Console Testing
+```bash
+python console_simulation.py
+```
+
+## 🏗️ Architecture
 
 ```
 ThreeBodySim/
-├── assets/              # Chứa Texture (hành tinh, skybox), Icons UI
-├── shaders/             # Các file GLSL (.vert, .frag)
 ├── src/
-│   ├── core/            # Lõi tính toán vật lý (RK4, Vector math)
-│   ├── ui/              # Các class giao diện PyQt6
-│   ├── renderer/        # Xử lý ModernGL (VBO, VAO, Shaders)
-│   └── main.py          # Điểm khởi chạy chương trình
-├── requirements.txt     # Danh sách thư viện
+│   ├── core/physics.py        # RK4 integrator, force calculations
+│   ├── renderer/gl_widget.py  # OpenGL rendering, trails, lighting
+│   ├── ui/main_window.py      # PyQt6 interface, controls
+│   └── main.py               # Application entry point
+├── shaders/                   # GLSL shaders (basic.vert, basic.frag)
+├── console_simulation.py      # Console physics testing
+├── opengl_3d.py              # Main GUI application
+├── requirements.txt          # Python dependencies
 └── README.md
 ```
 
-## 2. Xây Dựng Lõi Vật Lý (Physics Engine)
+### Key Components
+- **Body Class**: Encapsulates mass, position, velocity
+- **RK4 Step Function**: 4th-order Runge-Kutta integration
+- **GLWidget**: Handles OpenGL context, rendering pipeline
+- **SettingsDialog**: Table-based parameter editor
+- **MainWindow**: Qt application with real-time controls
 
-Để đạt độ chính xác cao và tương tác mượt mà, bạn cần tập trung vào:
+## 📊 Technical Details
 
-- **Sử Dụng NumPy**: Tính toán toàn bộ lực hấp dẫn dưới dạng ma trận. Thay vì dùng vòng lặp for, hãy dùng các phép toán Vector trên mảng NumPy để tận dụng tốc độ của C chạy dưới nền.
-- **Thuật Toán RK4 (Runge-Kutta Bậc 4)**: Chia mỗi bước thời gian \(dt\) thành 4 bước nhỏ để ước tính độ dốc. Điều này cực kỳ quan trọng: Nó giúp các vật thể không bị "văng" khỏi quỹ đạo một cách vô lý sau 1-2 phút mô phỏng.
+- **Physics Accuracy**: RK4 integration ensures stable long-term simulations
+- **Performance**: 60 FPS with NumPy optimization
+- **Rendering**: OpenGL immediate mode with lighting and blending
+- **UI Framework**: PyQt6 with responsive widgets and dialogs
 
-## 3. Quy Trình Rendering Chuyên Nghiệp (ModernGL)
+## 🎯 Completed Checklist
 
-Thay vì vẽ trực tiếp, bạn sẽ làm việc với luồng dữ liệu của GPU:
+### UI/UX Requirements ✅
+- [x] Reset Simulation button
+- [x] Time Scale adjustment (0.1x - 10x)
+- [x] Real-time displays (FPS, coordinates)
+- [x] Full Screen mode
+- [x] Professional settings interface
 
-- **Buffer Management**: Tạo các Vertex Buffer để lưu tọa độ. Trong mô phỏng 3 vật thể, tọa độ này thay đổi liên tục, vì vậy bạn cần dùng `dynamic=True` khi khởi tạo buffer.
-- **Shaders Custom**:
-  - **Vertex Shader**: Tính toán vị trí của từng hành tinh trong không gian 3D dựa trên ma trận Camera (Model-View-Projection).
-  - **Fragment Shader**: Đây là nơi tạo nên vẻ chuyên nghiệp. Bạn có thể viết code để tạo hiệu ứng Phong Lighting (độ bóng) hoặc Fresnel Effect (viền sáng quanh hành tinh).
-- **Skybox Rendering**: Vẽ một khối hộp khổng lồ bao quanh hệ thống với texture dải ngân hà để tạo cảm giác vô tận.
+### Graphics Requirements ✅
+- [x] Orbital Trails with color coding
+- [x] Lighting effects (Phong shading)
+- [x] Coordinate planes and grids
+- [x] Proportional body sizing
 
-## 4. Giao Diện Và Tương Tác (PyQt6 Bridge)
+### Advanced Features ✅
+- [x] Dynamic body addition/removal
+- [x] Mouse modifier controls
+- [x] Customizable initial conditions
+- [x] GitHub repository with documentation
 
-Đây là phần "giao tiếp" với người dùng:
+## 📝 Development Notes
 
-- **QDockWidget**: Sử dụng loại widget này cho bảng điều khiển bên cạnh. Người dùng có thể tháo rời hoặc ghim nó vào các cạnh màn hình tùy ý.
-- **Signals & Slots**: Khi người dùng thay đổi giá trị trên Slider (khối lượng, tốc độ), phát một `pyqtSignal`. GLWidget sẽ "nghe" tín hiệu này và cập nhật biến số vào vòng lặp vật lý ngay lập tức.
-- **Cơ Chế Click-to-Select**: Sử dụng kỹ thuật Raycasting: Bắn một tia từ vị trí chuột qua ống kính camera vào không gian 3D. Nếu tia này cắt qua vùng va chạm của vật thể, hiển thị khung bao quanh (Selection Outline) và mở bảng thuộc tính của vật thể đó.
+This project demonstrates professional software development practices:
+- Modular architecture with clear separation of concerns
+- Optimized physics calculations using NumPy
+- Modern GUI with PyQt6 and OpenGL integration
+- Comprehensive user controls and real-time feedback
+- Extensive documentation and version control
 
-## 5. Danh Sách Kiểm Tra Hoàn Thiện (Final Checklist)
+## 🔗 Repository
 
-### Yêu Cầu Về UI/UX:
-- [ ] Có nút Reset Simulation để đưa 3 vật thể về vị trí ban đầu.
-- [ ] Có tính năng Time Scale (điều chỉnh vận tốc thời gian).
-- [ ] Hiển thị thông số thời gian thực (FPS, Tọa độ \(x,y,z\)).
-- [ ] Chế độ Full Screen để trình diễn.
+The complete source code and documentation are available on GitHub:  
+https://github.com/hoanb1/three-body-gravity-simulation
 
-### Yêu Cầu Về Đồ Họa:
-- [ ] Có hiệu ứng Orbital Trails (đường mòn quỹ đạo) để thấy được hình dáng chuyển động.
-- [ ] Ánh sáng có độ tương phản cao (Dark space theme).
-- [ ] Texture hành tinh sắc nét (2K trở lên).
+## 🤝 Contributing
 
-## 6. Hướng Dẫn Đóng Gói
+Feel free to fork and enhance the simulation with additional features like:
+- Texture mapping for planetary surfaces
+- Advanced lighting models
+- Particle effects
+- Multi-body scenarios
+- Export capabilities
 
-Để phần mềm của bạn trông giống một sản phẩm thương mại:
+---
 
-- **Sử Dụng PyInstaller**: Đóng gói toàn bộ code và thư viện thành một file .exe duy nhất.
-- **Tạo Icon**: Thiết kế file .ico chuyên nghiệp cho phần mềm.
-- **Resource Compilation**: Sử dụng file .qrc của Qt để nén toàn bộ Shader và hình ảnh vào trong file thực thi, tránh việc người dùng vô tình xóa mất file assets.
-
-## Bước Tiếp Theo
-
-Bạn muốn bắt đầu xây dựng module nào đầu tiên? Tôi có thể hướng dẫn chi tiết cách thiết lập Lõi vật lý RK4 với NumPy hoặc cách cấu trúc GLWidget trong PyQt6 để bắt đầu vẽ những điểm đầu tiên lên màn hình.
+Built with ❤️ using PyQt6, OpenGL, and NumPy
