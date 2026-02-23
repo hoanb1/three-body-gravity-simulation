@@ -1,151 +1,126 @@
-# 3D Three-Body Gravity Simulation
+# 3-Body Gravity Simulation (Web App)
 
-A professional, real-time 3D simulation of gravitational interactions between celestial bodies using PyQt6, OpenGL, and NumPy. Features accurate physics, interactive controls, and polished graphics.
+A beautiful 3D gravity simulation built with React, Three.js, and Tailwind CSS. Simulate the gravitational interactions of three celestial bodies in real-time with an intuitive web interface.
 
-## 🚀 Features
+## 🌟 Live Demo
 
-### Physics Engine
-- **RK4 Integration**: High-precision numerical integration for stable, accurate orbital mechanics
-- **NumPy Vectorized Calculations**: Optimized force computations for real-time performance
-- **Customizable Bodies**: Mass, initial position, and velocity for each celestial body
+Visit the live application at [test.hoan.uk](https://test.hoan.uk)
 
-### 3D Rendering & Graphics
-- **OpenGL Rendering**: ModernGL with immediate mode for smooth 3D visualization
-- **Spherical Bodies**: Lit spheres with Phong shading proportional to mass
-- **Orbital Trails**: Long, colored trails (2000+ points) showing historical paths
-- **Coordinate Planes**: Semi-transparent XY, XZ, YZ planes with grid lines for spatial reference
-- **Lighting**: Ambient and directional lighting for realistic depth perception
+## ✨ Features
 
-### Interactive Controls
-- **Mouse Navigation**:
-  - Left-click + drag: Rotate view (XY) / Shift: Pan / Ctrl: Zoom / Alt: Rotate Z-axis
-  - Wheel zoom for additional scaling
-- **Settings Dialog**: Professional table-based interface for body parameters
-- **Dynamic Body Management**: Add/remove bodies (1-10) with auto-generated parameters
-- **Real-time Adjustments**: Time scale, reset simulation, full screen mode
+- **3D Visualization**: Immersive 3D rendering of celestial bodies and their orbital trails using Three.js.
+- **Real-time Physics**: Accurate gravitational force calculations with numerical integration.
+- **Interactive Controls**:
+  - Mouse: Orbit, zoom, and pan the 3D view.
+  - Time Scale: Adjust simulation speed (0.1x to 10x).
+  - Reset: Restart the simulation.
+  - Full Screen: Toggle immersive mode.
+- **Object Selection**: Click on bodies to select and view their properties (mass, position, velocity).
+- **Camera Follow**: Option to make the camera follow the selected object with manual adjustments allowed.
+- **UI Toggle**: Hide/show the control panel for unobstructed viewing.
+- **Responsive Design**: Works seamlessly on desktop and mobile browsers.
 
-### User Interface
-- **Real-time Displays**: FPS counter, current body position
-- **Professional Layout**: Control panel with intuitive buttons and sliders
-- **Responsive Design**: Table-based settings with scrollable interface
+## 🚀 Technologies Used
 
-## 📦 Installation
+- **Frontend**: React 18 with hooks and modern JavaScript
+- **3D Graphics**: Three.js with React Three Fiber for WebGL rendering
+- **Styling**: Tailwind CSS for responsive, utility-first UI design
+- **Physics**: Custom JavaScript implementation of gravitational forces and numerical integration
+- **Deployment**: Cloudflare Tunnel for secure, global access
+- **Build Tools**: Create React App with optimized production builds
 
-### Prerequisites
-- Python 3.8+
-- Ubuntu/Debian-based Linux (recommended for OpenGL support)
+## � Installation & Running Locally
 
-### Setup
-```bash
-# Clone or download the project
-cd /path/to/project
+1. **Prerequisites**: Node.js 16+ and npm
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/hoanb1/three-body-gravity-simulation.git
+   cd three-body-gravity-simulation
+   ```
 
-# Install dependencies
-pip install -r requirements.txt
-```
+3. **Install dependencies**:
+   ```bash
+   cd web-app
+   npm install
+   ```
 
-## 🎮 Usage
+4. **Start the development server**:
+   ```bash
+   npm start
+   ```
+   Open [http://localhost:3001](http://localhost:3001) in your browser.
 
-### Running the Simulation
-```bash
-python opengl_3d.py
-```
+5. **Build for production**:
+   ```bash
+   npm run build
+   npm install -g serve
+   serve -s build
+   ```
 
-### Controls
-- **Mouse**:
-  - Drag: Rotate view
-  - Shift + Drag: Pan camera
-  - Ctrl + Drag: Zoom
-  - Alt + Drag: Rotate Z-axis
-  - Wheel: Zoom
-- **Settings**: Click "Settings" to customize bodies and parameters
-- **Reset**: Reset simulation to initial state
-- **Time Scale**: Adjust simulation speed (0.1x - 10x)
-- **Full Screen**: Toggle full screen mode
+## 🌐 Deployment
 
-### Console Testing
-```bash
-python console_simulation.py
-```
+The application is deployed on a Raspberry Pi with Cloudflare Tunnel:
 
-## 🏗️ Architecture
+- **Server**: Raspberry Pi 4 at 192.168.3.24
+- **Local Port**: 3001
+- **Tunnel**: Cloudflare Tunnel routing test.hoan.uk to the local server
+- **Global Access**: https://test.hoan.uk
 
-```
-ThreeBodySim/
-├── src/
-│   ├── core/physics.py        # RK4 integrator, force calculations
-│   ├── renderer/gl_widget.py  # OpenGL rendering, trails, lighting
-│   ├── ui/main_window.py      # PyQt6 interface, controls
-│   └── main.py               # Application entry point
-├── shaders/                   # GLSL shaders (basic.vert, basic.frag)
-├── console_simulation.py      # Console physics testing
-├── opengl_3d.py              # Main GUI application
-├── requirements.txt          # Python dependencies
-└── README.md
-```
+**Deployment Steps**:
+1. Build the production app: `npm run build`
+2. Copy build to server: `scp -r build pi@192.168.3.24:~/web-app-build`
+3. Serve on server: `serve -s ~/web-app-build -l 3001`
+4. Ensure Cloudflare tunnel is configured for the hostname
 
-### Key Components
-- **Body Class**: Encapsulates mass, position, velocity
-- **RK4 Step Function**: 4th-order Runge-Kutta integration
-- **GLWidget**: Handles OpenGL context, rendering pipeline
-- **SettingsDialog**: Table-based parameter editor
-- **MainWindow**: Qt application with real-time controls
+## 📖 Usage
 
-## 📊 Technical Details
+1. **View the Simulation**: Observe the three bodies interacting gravitationally.
+2. **Adjust Time Scale**: Use the slider to speed up or slow down the simulation.
+3. **Select Objects**: Click on any body to highlight and view its properties.
+4. **Follow Camera**: Check "Follow Selected" to track the selected object.
+5. **Reset**: Click "Reset" to restart with initial conditions.
+6. **Hide UI**: Click "Hide UI" for a full-screen experience.
+7. **Navigate**: Use mouse to rotate, zoom, and pan the 3D view.
 
-- **Physics Accuracy**: RK4 integration ensures stable long-term simulations
-- **Performance**: 60 FPS with NumPy optimization
-- **Rendering**: OpenGL immediate mode with lighting and blending
-- **UI Framework**: PyQt6 with responsive widgets and dialogs
+## 🧮 Physics Implementation
 
-## 🎯 Completed Checklist
+The simulation implements:
+- **Gravitational Force**: F = G × m₁ × m₂ / r²
+- **Numerical Integration**: Euler method for position and velocity updates (configurable precision)
+- **Time Step**: 0.01 seconds with adjustable scaling
+- **Mass Proportional Sizing**: Body radius scales with mass for visual representation
 
-### UI/UX Requirements ✅
-- [x] Reset Simulation button
-- [x] Time Scale adjustment (0.1x - 10x)
-- [x] Real-time displays (FPS, coordinates)
-- [x] Full Screen mode
-- [x] Professional settings interface
+## 🎨 UI/UX Design
 
-### Graphics Requirements ✅
-- [x] Orbital Trails with color coding
-- [x] Lighting effects (Phong shading)
-- [x] Coordinate planes and grids
-- [x] Proportional body sizing
-
-### Advanced Features ✅
-- [x] Dynamic body addition/removal
-- [x] Mouse modifier controls
-- [x] Customizable initial conditions
-- [x] GitHub repository with documentation
-
-## 📝 Development Notes
-
-This project demonstrates professional software development practices:
-- Modular architecture with clear separation of concerns
-- Optimized physics calculations using NumPy
-- Modern GUI with PyQt6 and OpenGL integration
-- Comprehensive user controls and real-time feedback
-- Extensive documentation and version control
-
-## 🔗 Repository
-
-The complete source code and documentation are available on GitHub:  
-https://github.com/hoanb1/three-body-gravity-simulation
+- **Glassmorphism**: Modern backdrop blur effects with transparent panels
+- **Responsive Layout**: Adaptive design for various screen sizes
+- **Interactive Elements**: Hover effects, smooth transitions, and intuitive controls
+- **Color Scheme**: Dark space theme with bright accent colors
 
 ## 🤝 Contributing
 
-Feel free to fork and enhance the simulation with additional features like:
-- Texture mapping for planetary surfaces
-- Advanced lighting models
-- Particle effects
-- Multi-body scenarios
-- Export capabilities
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit changes: `git commit -m 'Add feature'`
+4. Push to branch: `git push origin feature-name`
+5. Open a pull request
+
+## � License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Built with React Three Fiber for seamless 3D integration
+- Tailwind CSS for beautiful, responsive UI
+- Three.js for powerful WebGL rendering
+- Cloudflare for reliable tunneling
+
+## � Development History
+
+This project evolved from a Python desktop application (PyQt6 + OpenGL) to a modern web application using React and Three.js for better accessibility, performance, and cross-platform compatibility.
 
 ---
 
-Built with ❤️ using PyQt6, OpenGL, and NumPy
+**Note**: The original Python implementation is available in the Git history for reference.
